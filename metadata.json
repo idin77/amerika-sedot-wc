@@ -1,0 +1,8 @@
+{
+  "name": "SepticProDirect",
+  "description": "Professional septic tank pumping, cleaning, inspection, and maintenance marketing and contractor dispatch platform for Houston, Texas and surrounding areas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
