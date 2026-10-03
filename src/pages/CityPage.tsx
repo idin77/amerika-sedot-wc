@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { Phone, ArrowRight, ShieldCheck, MapPin, CheckCircle, Info, MessageCircle } from 'lucide-react';
 import { CityArea } from '../types';
 import { BUSINESS_CONFIG, SERVICES } from '../config/business';
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
+import { FAQSchema } from '../components/FAQSchema';
+import { getCityFAQs } from '../lib/faqData';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
 import { trackEvent } from '../lib/analytics';
@@ -13,6 +16,8 @@ interface CityPageProps {
 }
 
 export function CityPage({ city, onNavigate }: CityPageProps) {
+  const cityFAQs = useMemo(() => getCityFAQs(city), [city]);
+
   const handlePhoneClick = () => {
     trackEvent('phone_click', {
       source: `city_page_${city.id}`,
@@ -203,6 +208,16 @@ export function CityPage({ city, onNavigate }: CityPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Dynamic City-Specific FAQ Section & JSON-LD FAQSchema */}
+      <FAQSchema
+        renderVisibleUI={true}
+        items={cityFAQs}
+        title={`Frequently Asked Questions About Septic Service in ${city.name}`}
+        subtitle={`Local insights on ${city.name} soil percolation, Texas TCEQ septic hauler compliance, system pricing, and emergency dispatch.`}
+        badgeText={`${city.name}, TX Septic FAQ`}
+        sectionId={`faq-${city.id}`}
+      />
     </>
   );
 }

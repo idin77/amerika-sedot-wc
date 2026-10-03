@@ -6,7 +6,8 @@
   "description": "Professional septic tank pumping, cleaning, inspection, and maintenance marketing and contractor dispatch platform for Houston, TX.",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
+    "sitemap:generate": "tsx scripts/generate-sitemap.ts",
+    "build": "tsx scripts/generate-sitemap.ts && vite build",
     "start": "tsx server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

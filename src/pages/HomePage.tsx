@@ -19,8 +19,10 @@ import { BUSINESS_CONFIG, SERVICES, SERVICE_AREAS, FREQUENTLY_ASKED_QUESTIONS } 
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
 import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
+import { FAQSchema } from '../components/FAQSchema';
+import { ReviewSchema } from '../components/ReviewSchema';
+import { TestimonialSlider } from '../components/TestimonialSlider';
 import { QuoteForm } from '../components/QuoteForm';
-import { FAQAccordion } from '../components/FAQAccordion';
 import { CostEstimatorModal } from '../components/CostEstimatorModal';
 import { trackEvent } from '../lib/analytics';
 
@@ -54,7 +56,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
         description="Connect with local septic service professionals for residential septic pumping, maintenance, and service requests in the Houston area."
         canonicalPath="/"
         schemaType="WebSite"
-        faqItems={FREQUENTLY_ASKED_QUESTIONS}
       />
       <LocalBusinessSchema />
 
@@ -273,6 +274,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </div>
       </section>
+
+      {/* Social Proof: Verified Customer Reviews Carousel / Testimonial Slider */}
+      <TestimonialSlider onNavigate={onNavigate} />
 
       {/* 4. How It Works Section */}
       <section className="py-16 sm:py-20 bg-white border-t border-slate-200">
@@ -511,10 +515,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      {/* 8. FAQ Section */}
-      <FAQAccordion items={FREQUENTLY_ASKED_QUESTIONS} />
+      {/* 8. Customer Testimonials & Review Schema */}
+      <ReviewSchema renderVisibleUI={true} />
 
-      {/* 9. Dedicated Lead Form Section */}
+      {/* 9. FAQ Section: Displays common septic questions & injects JSON-LD FAQSchema for local SEO */}
+      <FAQSchema
+        renderVisibleUI={true}
+        items={FREQUENTLY_ASKED_QUESTIONS}
+        title="Frequently Asked Questions About Septic Pumping in Houston"
+        subtitle="Transparent answers regarding tank pumping intervals, costs across Harris County, emergency overflow signs, and contractor matching."
+      />
+
+      {/* 10. Dedicated Lead Form Section */}
       <section className="py-16 sm:py-20 bg-white border-t border-slate-200" id="quote-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">

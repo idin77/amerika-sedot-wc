@@ -1,8 +1,12 @@
+import { useMemo } from 'react';
 import { ArrowRight, CheckCircle2, Phone, AlertCircle, Shield, Clock, FileCheck, MessageCircle } from 'lucide-react';
 import { ServiceItem } from '../types';
 import { BUSINESS_CONFIG, SERVICE_AREAS } from '../config/business';
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
+import { ImageSchema } from '../components/ImageSchema';
+import { FAQSchema } from '../components/FAQSchema';
+import { getServiceFAQs } from '../lib/faqData';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
 import { trackEvent } from '../lib/analytics';
@@ -33,6 +37,8 @@ export function ServicePage({ service, onNavigate }: ServicePageProps) {
       ? IMAGES.pumpingOperation
       : IMAGES.heroTruck;
 
+  const serviceFAQs = useMemo(() => getServiceFAQs(service), [service]);
+
   return (
     <>
       <SEOHead
@@ -46,6 +52,15 @@ export function ServicePage({ service, onNavigate }: ServicePageProps) {
           areaServed: 'Greater Houston, TX',
         }}
         breadcrumbs={breadcrumbs}
+      />
+      <ImageSchema
+        pageUrl={`/${service.slug}/`}
+        images={{
+          url: serviceImage.src,
+          name: `${service.name} in Houston, TX - ${BUSINESS_CONFIG.brandName}`,
+          caption: serviceImage.alt,
+          description: `${service.headline} - ${service.shortDesc}`,
+        }}
       />
 
       <Breadcrumbs items={breadcrumbs} onNavigate={onNavigate} />
@@ -235,6 +250,16 @@ export function ServicePage({ service, onNavigate }: ServicePageProps) {
           </div>
         </div>
       </section>
+
+      {/* Dynamic Service-Specific FAQ Section & JSON-LD FAQSchema */}
+      <FAQSchema
+        renderVisibleUI={true}
+        items={serviceFAQs}
+        title={`Frequently Asked Questions About ${service.name}`}
+        subtitle={`Expert answers regarding ${service.name.toLowerCase()} costs, service intervals, and Texas TCEQ guidelines across Greater Houston.`}
+        badgeText={`${service.name} Help Guide`}
+        sectionId={`faq-${service.id}`}
+      />
     </>
   );
 }

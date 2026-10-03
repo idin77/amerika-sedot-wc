@@ -12,8 +12,10 @@ import { ContactPage } from './pages/ContactPage';
 import { RequestQuotePage } from './pages/RequestQuotePage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { SitemapPage } from './pages/SitemapPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { QuoteForm } from './components/QuoteForm';
+import { MetaTags } from './components/MetaTags';
 import { X } from 'lucide-react';
 
 export default function App() {
@@ -101,12 +103,20 @@ export default function App() {
       return <TermsOfServicePage onNavigate={handleNavigate} />;
     }
 
-    // 10. Fallback 404
+    // 10. Sitemap & URL Directory
+    if (currentPath === '/sitemap/' || currentPath === '/sitemap' || currentPath === '/html-sitemap/') {
+      return <SitemapPage onNavigate={handleNavigate} />;
+    }
+
+    // 11. Fallback 404
     return <NotFoundPage onNavigate={handleNavigate} />;
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans antialiased selection:bg-emerald-600 selection:text-white">
+      {/* Route-Aware Dynamic Meta Tags (Title, Description, Canonical & Social) */}
+      <MetaTags currentPath={currentPath} />
+
       {/* Top Bar Navigation */}
       <Header
         currentPath={currentPath}

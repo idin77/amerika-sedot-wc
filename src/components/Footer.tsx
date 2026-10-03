@@ -186,6 +186,25 @@ export function Footer({ onNavigate }: FooterProps) {
                   Terms of Service
                 </a>
               </li>
+              <li>
+                <a
+                  href="/sitemap/"
+                  onClick={(e) => handleLink(e, '/sitemap/')}
+                  className="hover:text-emerald-400 transition-colors block py-0.5"
+                >
+                  HTML Sitemap
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-slate-400 hover:text-emerald-400 transition-colors block py-0.5"
+                >
+                  XML Sitemap (Crawler)
+                </a>
+              </li>
             </ul>
 
             <div className="pt-3">
@@ -211,6 +230,8 @@ export function Footer({ onNavigate }: FooterProps) {
               <a href="/privacy-policy/" onClick={(e) => handleLink(e, '/privacy-policy/')} className="hover:text-slate-300">Privacy</a>
               <span>·</span>
               <a href="/terms-of-service/" onClick={(e) => handleLink(e, '/terms-of-service/')} className="hover:text-slate-300">Terms</a>
+              <span>·</span>
+              <a href="/sitemap/" onClick={(e) => handleLink(e, '/sitemap/')} className="hover:text-slate-300">Sitemap</a>
               <span>·</span>
               <a href="/contact/" onClick={(e) => handleLink(e, '/contact/')} className="hover:text-slate-300">Contact</a>
             </div>

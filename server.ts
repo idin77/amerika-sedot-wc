@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { generateSitemapXml } from './src/lib/sitemap';
 
 dotenv.config();
 
@@ -174,50 +175,10 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // 3. Technical SEO: XML Sitemap
 app.get('/sitemap.xml', (req: Request, res: Response) => {
   const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+  const sitemapXml = generateSitemapXml(baseUrl);
 
-  const urls = [
-    { loc: '/', priority: '1.0', changefreq: 'daily' },
-    { loc: '/septic-tank-pumping-houston-tx/', priority: '0.9', changefreq: 'weekly' },
-    { loc: '/septic-tank-cleaning-houston/', priority: '0.9', changefreq: 'weekly' },
-    { loc: '/septic-tank-inspection-houston/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/septic-tank-maintenance-houston/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/emergency-septic-service-houston/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/houston-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/katy-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/sugar-land-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/the-woodlands-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/pearland-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/cypress-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/spring-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/conroe-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/tomball-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/richmond-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/friendswood-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/league-city-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/service-areas/humble-tx/', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/about-us/', priority: '0.6', changefreq: 'monthly' },
-    { loc: '/contact/', priority: '0.7', changefreq: 'monthly' },
-    { loc: '/request-a-quote/', priority: '0.9', changefreq: 'weekly' },
-    { loc: '/privacy-policy/', priority: '0.3', changefreq: 'monthly' },
-    { loc: '/terms-of-service/', priority: '0.3', changefreq: 'monthly' },
-  ];
-
-  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (u) => `  <url>
-    <loc>${baseUrl}${u.loc}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-  </url>`
-  )
-  .join('\n')}
-</urlset>`;
-
-  res.header('Content-Type', 'application/xml');
+  res.header('Content-Type', 'application/xml; charset=utf-8');
+  res.header('Cache-Control', 'public, max-age=86400');
   res.send(sitemapXml);
 });
 

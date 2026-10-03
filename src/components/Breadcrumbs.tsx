@@ -1,4 +1,5 @@
 import { ChevronRight, Home } from 'lucide-react';
+import { BreadcrumbSchema } from './BreadcrumbSchema';
 
 export interface BreadcrumbItem {
   name: string;
@@ -12,7 +13,9 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items, onNavigate }: BreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className="py-3 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <>
+      <BreadcrumbSchema items={items} />
+      <nav aria-label="Breadcrumb" className="py-3 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <ol className="flex items-center flex-wrap gap-1.5 text-xs text-slate-500">
         <li className="flex items-center gap-1.5">
           <a
@@ -54,5 +57,6 @@ export function Breadcrumbs({ items, onNavigate }: BreadcrumbsProps) {
         })}
       </ol>
     </nav>
+    </>
   );
 }
