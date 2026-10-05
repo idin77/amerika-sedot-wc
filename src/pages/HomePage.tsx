@@ -19,7 +19,8 @@ import { BUSINESS_CONFIG, SERVICES, SERVICE_AREAS, FREQUENTLY_ASKED_QUESTIONS } 
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
 import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
-import { FAQAccordion } from '../components/FAQAccordion';
+import { EmergencyRepairAlert } from '../components/EmergencyRepairAlert';
+import { SepticFAQ } from '../components/SepticFAQ';
 import { SepticMaintenanceBlog } from '../components/SepticMaintenanceBlog';
 import { ReviewSchema } from '../components/ReviewSchema';
 import { CustomerTestimonials } from '../components/CustomerTestimonials';
@@ -67,6 +68,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
         onClose={() => setEstimatorOpen(false)}
         onSelectEstimate={(est) => setSelectedEstimate(est)}
       />
+
+      {/* High-Volume & Rainy Season Emergency Septic Alert Banner */}
+      <EmergencyRepairAlert onNavigate={onNavigate} />
 
       {/* 1. Hero Section */}
       <section className="relative bg-slate-900 text-white overflow-hidden">
@@ -527,13 +531,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
       {/* Review Schema: Injects JSON-LD structured data for Google SERP star ratings */}
       <ReviewSchema renderVisibleUI={false} />
 
-      {/* 9. Interactive FAQ Accordion: Dynamically renders septic maintenance FAQs & injects JSON-LD FAQPage Schema */}
-      <FAQAccordion
-        title="Frequently Asked Questions About Septic Maintenance in Houston"
-        subtitle="Transparent answers regarding tank pumping intervals, warning signs of full tanks, aerobic ATU care, and costs across Greater Houston."
-        badgeText="Houston Septic Maintenance Guide"
-        sectionId="home-faq-accordion"
-      />
+      {/* 9. SepticFAQ: Accordion-style common questions about septic systems & JSON-LD FAQPage Schema */}
+      <SepticFAQ onNavigate={onNavigate} />
 
       {/* 10. Educational Knowledge Base & Texas TCEQ Septic Regulations Blog for Long-Tail SEO */}
       <SepticMaintenanceBlog onNavigate={onNavigate} />

@@ -9,7 +9,9 @@ export type AnalyticsEvent =
   | 'checklist_downloaded'
   | 'checklist_item_toggled'
   | 'checklist_reset'
-  | 'blog_post_viewed';
+  | 'blog_post_viewed'
+  | 'emergency_alert_viewed'
+  | 'emergency_alert_action_clicked';
 
 interface EventProperties {
   location?: string;

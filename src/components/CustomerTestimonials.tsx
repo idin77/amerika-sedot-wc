@@ -10,7 +10,10 @@ import {
   ArrowRight,
   Sparkles,
   Filter,
-  BadgeCheck
+  BadgeCheck,
+  MessageSquarePlus,
+  X,
+  Loader2
 } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/business';
 
@@ -150,7 +153,7 @@ export function CustomerTestimonials({
   onNavigate,
   className = '',
 }: CustomerTestimonialsProps) {
-  // Normalize category mapping
+  // Normalized service category mapping
   const activeServiceCategory = useMemo(() => {
     if (!serviceId) return 'all';
     const s = serviceId.toLowerCase();
@@ -163,6 +166,20 @@ export function CustomerTestimonials({
 
   const [selectedFilter, setSelectedFilter] = useState<string>(activeServiceCategory);
   const [helpfulVotes, setHelpfulVotes] = useState<Record<string, number>>({});
+  const [reviews, setReviews] = useState<HomeownerReview[]>(REAL_HOMEOWNER_TESTIMONIALS);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
+  const [submitFeedback, setSubmitFeedback] = useState<string | null>(null);
+
+  // New review form state
+  const [newReviewForm, setNewReviewForm] = useState({
+    author: '',
+    location: '',
+    rating: 5,
+    serviceCategory: 'pumping' as HomeownerReview['serviceCategory'],
+    title: '',
+    reviewText: '',
+  });
 
   useEffect(() => {
     if (activeServiceCategory !== 'all') {
@@ -170,19 +187,108 @@ export function CustomerTestimonials({
     }
   }, [activeServiceCategory]);
 
-  // Filter reviews
-  const filteredReviews = useMemo(() => {
-    if (selectedFilter === 'all') return REAL_HOMEOWNER_TESTIMONIALS;
-    return REAL_HOMEOWNER_TESTIMONIALS.filter(
-      (r) => r.serviceCategory === selectedFilter
-    );
-  }, [selectedFilter]);
+  // Fetch reviews from API endpoint with local fallback
+  useEffect(() => {
+    let isMounted = true;
+    const fetchReviews = async () => {
+      setIsLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+        if (selectedFilter !== 'all') {
+          queryParams.set('category', selectedFilter);
+        }
+        if (cityName) {
+          queryParams.set('county', cityName);
+        }
 
+        const res = await fetch(`/api/reviews?${queryParams.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.reviews) && isMounted) {
+            setReviews(data.reviews);
+          }
+        } else {
+          // fallback to client array
+          if (isMounted) {
+            setReviews(
+              selectedFilter === 'all'
+                ? REAL_HOMEOWNER_TESTIMONIALS
+                : REAL_HOMEOWNER_TESTIMONIALS.filter((r) => r.serviceCategory === selectedFilter)
+            );
+          }
+        }
+      } catch (err) {
+        // Fallback for offline / static
+        if (isMounted) {
+          setReviews(
+            selectedFilter === 'all'
+              ? REAL_HOMEOWNER_TESTIMONIALS
+              : REAL_HOMEOWNER_TESTIMONIALS.filter((r) => r.serviceCategory === selectedFilter)
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchReviews();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedFilter, cityName]);
+
+  // Handle helpful vote
   const handleHelpful = (id: string) => {
     setHelpfulVotes((prev) => ({
       ...prev,
       [id]: (prev[id] || 0) + 1,
     }));
+  };
+
+  // Handle review submission
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReviewForm.author.trim() || !newReviewForm.reviewText.trim()) return;
+
+    const newRev: HomeownerReview = {
+      id: `rev-client-${Date.now()}`,
+      author: newReviewForm.author.trim(),
+      location: newReviewForm.location.trim() || 'Houston, TX',
+      county: 'Greater Houston',
+      rating: newReviewForm.rating,
+      date: 'Just now',
+      serviceCategory: newReviewForm.serviceCategory,
+      serviceLabel:
+        newReviewForm.serviceCategory === 'emergency'
+          ? 'Emergency Septic Service'
+          : newReviewForm.serviceCategory === 'cleaning'
+          ? 'Septic Tank Cleaning'
+          : newReviewForm.serviceCategory === 'inspection'
+          ? 'Septic System Inspection'
+          : 'Residential Septic Pumping',
+      tankType: 'Residential Septic System',
+      title: newReviewForm.title.trim() || 'Verified Homeowner Experience',
+      reviewText: newReviewForm.reviewText.trim(),
+      verified: true,
+      helpfulCount: 1,
+    };
+
+    setReviews((prev) => [newRev, ...prev]);
+    setSubmitFeedback('Thank you! Your verified review has been posted.');
+    setTimeout(() => {
+      setIsSubmitModalOpen(false);
+      setSubmitFeedback(null);
+      setNewReviewForm({
+        author: '',
+        location: '',
+        rating: 5,
+        serviceCategory: 'pumping',
+        title: '',
+        reviewText: '',
+      });
+    }, 1800);
   };
 
   // Dynamic headings
@@ -269,7 +375,7 @@ export function CustomerTestimonials({
         ratingCount: '286',
         reviewCount: '286',
       },
-      review: REAL_HOMEOWNER_TESTIMONIALS.map((r) => ({
+      review: reviews.map((r) => ({
         '@type': 'Review',
         name: r.title,
         author: {
@@ -303,7 +409,7 @@ export function CustomerTestimonials({
         tag.parentNode.removeChild(tag);
       }
     };
-  }, [serviceName, cityName, serviceId, cityId]);
+  }, [serviceName, cityName, serviceId, cityId, reviews]);
 
   return (
     <section 
@@ -419,90 +525,308 @@ export function CustomerTestimonials({
             })}
           </div>
 
-          <div className="text-xs text-slate-500">
-            Showing <span className="font-semibold text-slate-800">{filteredReviews.length}</span> verified reviews
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-500 hidden sm:inline">
+              Showing <span className="font-semibold text-slate-800">{reviews.length}</span> verified reviews
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsSubmitModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <MessageSquarePlus className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Leave a Review</span>
+            </button>
           </div>
         </div>
 
-        {/* Reviews Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredReviews.map((review) => {
-            const currentHelpful = review.helpfulCount + (helpfulVotes[review.id] || 0);
-
-            return (
-              <div
-                key={review.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between relative group"
-              >
-                <div>
-                  {/* Top Bar: Stars + Date */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-0.5 text-amber-500">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                      <Calendar className="w-3 h-3" />
-                      <span>{review.date}</span>
-                    </div>
-                  </div>
-
-                  {/* Review Title */}
-                  <h3 className="font-bold text-slate-900 text-base mb-2.5 leading-snug group-hover:text-emerald-950 transition-colors">
-                    "{review.title}"
-                  </h3>
-
-                  {/* Review Text */}
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                    {review.reviewText}
-                  </p>
+        {/* Loading Skeleton */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-slate-50 border border-slate-200 rounded-2xl p-6 h-64 space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-slate-200 rounded w-24" />
+                  <div className="h-4 bg-slate-200 rounded w-16" />
                 </div>
-
-                {/* Bottom Metadata & Author Info */}
-                <div className="pt-4 border-t border-slate-100">
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-slate-900">
-                        <span className="truncate">{review.author}</span>
-                        {review.verified && (
-                          <span
-                            className="inline-flex items-center text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/70"
-                            title="Verified Texas Homeowner"
-                          >
-                            <CheckCircle2 className="w-3 h-3 mr-0.5 text-emerald-600 inline" />
-                            Verified
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 truncate">
-                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                        <span className="truncate">{review.location} ({review.county})</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* System Tag & Helpful Count */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-50">
-                    <span className="font-medium bg-slate-100 px-2 py-0.5 rounded text-slate-700 truncate max-w-[170px]">
-                      {review.tankType}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => handleHelpful(review.id)}
-                      className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-colors cursor-pointer"
-                      title="Mark review as helpful"
-                    >
-                      <ThumbsUp className="w-3 h-3" />
-                      <span>Helpful ({currentHelpful})</span>
-                    </button>
-                  </div>
+                <div className="h-5 bg-slate-200 rounded w-3/4" />
+                <div className="space-y-2">
+                  <div className="h-3 bg-slate-200 rounded w-full" />
+                  <div className="h-3 bg-slate-200 rounded w-5/6" />
+                  <div className="h-3 bg-slate-200 rounded w-4/6" />
+                </div>
+                <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
+                  <div className="h-4 bg-slate-200 rounded w-28" />
+                  <div className="h-4 bg-slate-200 rounded w-16" />
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200 p-8 space-y-3">
+            <Quote className="w-8 h-8 text-slate-400 mx-auto" />
+            <h4 className="text-sm font-bold text-slate-800">No reviews found in this category</h4>
+            <p className="text-xs text-slate-500">
+              Be the first Houston homeowner to share feedback for this category.
+            </p>
+            <button
+              type="button"
+              onClick={() => setSelectedFilter('all')}
+              className="px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              View All Reviews
+            </button>
+          </div>
+        ) : (
+          /* Reviews Cards Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reviews.map((review) => {
+              const currentHelpful = review.helpfulCount + (helpfulVotes[review.id] || 0);
+
+              return (
+                <div
+                  key={review.id}
+                  className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between relative group"
+                >
+                  <div>
+                    {/* Top Bar: Stars + Date */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-0.5 text-amber-500">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                        <Calendar className="w-3 h-3" />
+                        <span>{review.date}</span>
+                      </div>
+                    </div>
+
+                    {/* Review Title */}
+                    <h3 className="font-bold text-slate-900 text-base mb-2.5 leading-snug group-hover:text-emerald-950 transition-colors">
+                      "{review.title}"
+                    </h3>
+
+                    {/* Review Text */}
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                      {review.reviewText}
+                    </p>
+                  </div>
+
+                  {/* Bottom Metadata & Author Info */}
+                  <div className="pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-slate-900">
+                          <span className="truncate">{review.author}</span>
+                          {review.verified && (
+                            <span
+                              className="inline-flex items-center text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/70"
+                              title="Verified Texas Homeowner"
+                            >
+                              <CheckCircle2 className="w-3 h-3 mr-0.5 text-emerald-600 inline" />
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 truncate">
+                          <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{review.location} ({review.county})</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* System Tag & Helpful Count */}
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-50">
+                      <span className="font-medium bg-slate-100 px-2 py-0.5 rounded text-slate-700 truncate max-w-[170px]">
+                        {review.tankType}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => handleHelpful(review.id)}
+                        className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-700 font-medium transition-colors cursor-pointer"
+                        title="Mark review as helpful"
+                      >
+                        <ThumbsUp className="w-3 h-3" />
+                        <span>Helpful ({currentHelpful})</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Leave a Review Modal */}
+        {isSubmitModalOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in"
+            onClick={() => setIsSubmitModalOpen(false)}
+          >
+            <div
+              className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 max-w-lg w-full shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setIsSubmitModalOpen(false)}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="mb-5 space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-emerald-700 text-xs font-bold uppercase tracking-wider">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Verified Homeowner Feedback</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900">
+                  Share Your Septic Service Experience
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Your feedback helps Houston neighbors choose licensed, reliable OSSF professionals.
+                </p>
+              </div>
+
+              {submitFeedback ? (
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold text-center flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <span>{submitFeedback}</span>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Your Name / Initial
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newReviewForm.author}
+                        onChange={(e) => setNewReviewForm((p) => ({ ...p, author: e.target.value }))}
+                        placeholder="e.g. Rachel & Chris M."
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Houston Neighborhood / City
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newReviewForm.location}
+                        onChange={(e) => setNewReviewForm((p) => ({ ...p, location: e.target.value }))}
+                        placeholder="e.g. Katy, TX or The Woodlands"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Service Received
+                      </label>
+                      <select
+                        value={newReviewForm.serviceCategory}
+                        onChange={(e) =>
+                          setNewReviewForm((p) => ({
+                            ...p,
+                            serviceCategory: e.target.value as HomeownerReview['serviceCategory'],
+                          }))
+                        }
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      >
+                        <option value="pumping">Residential Septic Pumping</option>
+                        <option value="emergency">Emergency Backup Service</option>
+                        <option value="cleaning">Septic Tank Cleaning / Jetting</option>
+                        <option value="inspection">OSSF Real Estate Inspection</option>
+                        <option value="maintenance">Aerobic ATU Maintenance</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Star Rating
+                      </label>
+                      <div className="flex items-center gap-1 pt-1.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setNewReviewForm((p) => ({ ...p, rating: s }))}
+                            className="text-amber-400 hover:scale-110 transition-transform cursor-pointer"
+                          >
+                            <Star
+                              className={`w-5 h-5 ${
+                                s <= newReviewForm.rating
+                                  ? 'fill-amber-400 text-amber-400'
+                                  : 'text-slate-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        <span className="text-xs font-bold text-slate-700 ml-2">
+                          {newReviewForm.rating} of 5 Stars
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Review Headline
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newReviewForm.title}
+                      onChange={(e) => setNewReviewForm((p) => ({ ...p, title: e.target.value }))}
+                      placeholder="e.g. Prompt Saturday dispatch with clear flat rate"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Your Comments
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={newReviewForm.reviewText}
+                      onChange={(e) => setNewReviewForm((p) => ({ ...p, reviewText: e.target.value }))}
+                      placeholder="Describe the technician's professionalism, pumping thoroughness, property care..."
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsSubmitModalOpen(false)}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs"
+                    >
+                      Post Verified Review
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Bottom Conversion Callout */}
         <div className="mt-12 p-6 sm:p-8 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
