@@ -3,6 +3,7 @@ import { BUSINESS_CONFIG, SERVICE_AREAS } from '../config/business';
 import { SEOHead } from '../components/SEOHead';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
+import { EmergencyIndicator } from '../components/EmergencyIndicator';
 import { trackEvent } from '../lib/analytics';
 
 interface ContactPageProps {
@@ -34,14 +35,14 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       {/* Hero */}
       <section className="bg-slate-900 text-white py-14 sm:py-18">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-          <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-            We Are Here to Assist
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <EmergencyIndicator variant="pill" showPhone={false} className="bg-red-950/80 border-red-500/60 text-red-200" />
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
             Contact SepticProDirect
           </h1>
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Need pricing estimates, partner scheduling, or service information for your Houston area property? Get in touch with our team today.
+            Need pricing estimates, partner scheduling, or urgent emergency assistance for your Houston area property? Get in touch with our team today.
           </p>
         </div>
       </section>
@@ -49,6 +50,9 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       {/* Contact Content */}
       <section className="py-14 sm:py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Urgent Emergency Dispatch Callout Card */}
+          <EmergencyIndicator variant="card" className="mb-10" />
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* Left Col: Contact Details */}
             <div className="lg:col-span-5 space-y-6">

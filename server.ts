@@ -161,6 +161,43 @@ app.post('/api/quote', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// 1b. Lead Conversion Tracking & Webhook Forwarder Endpoint
+app.post('/api/track-conversion', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const conversionData = req.body;
+    console.log(`[CONVERSION TRACKED] Type: ${conversionData.eventType || 'conversion'}`, {
+      leadId: conversionData.leadId,
+      service: conversionData.service,
+      zipCode: conversionData.zipCode,
+      buttonType: conversionData.buttonType,
+    });
+
+    // Relay to configured Lead Notification Webhook
+    const webhookUrl = process.env.LEAD_NOTIFICATION_WEBHOOK_URL;
+    if (webhookUrl) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notificationType: 'lead_conversion_event',
+            ...conversionData,
+            serverTimestamp: new Date().toISOString(),
+          }),
+        });
+        console.log(`[CONVERSION WEBHOOK] Relayed event to ${webhookUrl}`);
+      } catch (webhookErr) {
+        console.error('[CONVERSION WEBHOOK ERROR]', webhookErr);
+      }
+    }
+
+    res.status(200).json({ success: true, tracked: true });
+  } catch (err: any) {
+    console.error('[API ERROR /api/track-conversion]', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 2. Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
 import { LeadFormData, LeadSubmissionResponse } from '../types';
 import { trackEvent } from '../lib/analytics';
+import { TrustBadges } from './TrustBadges';
+import { ServiceProgress } from './ServiceProgress';
 
 interface QuoteFormProps {
   defaultService?: string;
@@ -106,6 +108,11 @@ export function QuoteForm({
         service: formData.serviceNeeded,
         leadId: result.leadId,
         zipCode: formData.zipCode,
+        propertyType: formData.propertyType,
+        tankSizeEstimated: formData.tankSizeEstimated,
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
       });
 
       if (onSuccess) {
@@ -125,6 +132,11 @@ export function QuoteForm({
         service: formData.serviceNeeded,
         leadId: fallbackId,
         zipCode: formData.zipCode,
+        propertyType: formData.propertyType,
+        tankSizeEstimated: formData.tankSizeEstimated,
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
       });
     } finally {
       setSubmitting(false);
@@ -133,55 +145,22 @@ export function QuoteForm({
 
   if (submittedResponse?.success) {
     return (
-      <div className="bg-white border border-emerald-200 rounded-xl p-6 sm:p-8 text-center shadow-sm">
-        <div className="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="w-8 h-8" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Quote Request Received!</h3>
-        <p className="text-sm text-slate-600 mb-4 max-w-md mx-auto">
-          Thank you, <span className="font-semibold text-slate-900">{formData.fullName}</span>. Your service request has been queued for contractor matching.
-        </p>
-
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 max-w-sm mx-auto mb-6 text-left text-xs space-y-1.5">
-          <div className="flex justify-between">
-            <span className="text-slate-500">Confirmation ID:</span>
-            <span className="font-mono font-bold text-slate-900">{submittedResponse.leadId}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-500">Service:</span>
-            <span className="font-medium text-slate-900">{formData.serviceNeeded}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-500">Service ZIP:</span>
-            <span className="font-medium text-slate-900">{formData.zipCode}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-500">Status:</span>
-            <span className="font-semibold text-emerald-700">Dispatch Queued</span>
-          </div>
-        </div>
-
-        <p className="text-xs text-slate-500 mb-6 max-w-md mx-auto leading-relaxed">
-          A licensed local septic partner will review your requirements, confirm tank access logistics, and call you at{' '}
-          <strong className="text-slate-800">{formData.phone}</strong> with upfront pricing and scheduling options.
-        </p>
-
-        <button
-          type="button"
-          onClick={() => {
-            setSubmittedResponse(null);
-            setFormData((prev) => ({
-              ...prev,
-              description: '',
-              website_honeypot: '',
-              formRenderTime: Date.now(),
-            }));
-          }}
-          className="text-xs font-semibold text-slate-700 hover:text-slate-900 underline underline-offset-4"
-        >
-          Submit another request
-        </button>
-      </div>
+      <ServiceProgress
+        initialStage="contractor_assigned"
+        leadId={submittedResponse.leadId}
+        serviceType={formData.serviceNeeded}
+        zipCode={formData.zipCode}
+        homeownerName={formData.fullName}
+        onReset={() => {
+          setSubmittedResponse(null);
+          setFormData((prev) => ({
+            ...prev,
+            description: '',
+            website_honeypot: '',
+            formRenderTime: Date.now(),
+          }));
+        }}
+      />
     );
   }
 
@@ -191,9 +170,12 @@ export function QuoteForm({
         <h3 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-bold tracking-tight text-slate-900 mb-1`}>
           {title}
         </h3>
-        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
           {subtitle}
         </p>
+
+        {/* High-Converting Trust Badges: Licensed & Insured, BBB Accredited, Family Owned */}
+        <TrustBadges variant={compact ? 'compact' : 'cards'} showSubtitles={!compact} />
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -402,9 +384,12 @@ export function QuoteForm({
           )}
         </button>
 
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 pt-1">
-          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>No obligation · Upfront pricing · Licensed Texas partners</span>
+        <div className="flex flex-col items-center justify-center gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>100% Free · No Obligation · Upfront Pricing Before Work Begins</span>
+          </div>
+          <TrustBadges variant="inline" className="py-0 text-[11px]" />
         </div>
       </form>
     </div>

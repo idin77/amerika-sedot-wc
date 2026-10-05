@@ -5,7 +5,11 @@ import { BUSINESS_CONFIG, SERVICE_AREAS } from '../config/business';
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
 import { ImageSchema } from '../components/ImageSchema';
-import { FAQSchema } from '../components/FAQSchema';
+import { CustomerTestimonials } from '../components/CustomerTestimonials';
+import { ServiceComparisonTable } from '../components/ServiceComparisonTable';
+import { ServiceDemoVideo } from '../components/ServiceDemoVideo';
+import { MaintenanceChecklist } from '../components/MaintenanceChecklist';
+import { FAQAccordion } from '../components/FAQAccordion';
 import { getServiceFAQs } from '../lib/faqData';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
@@ -251,13 +255,42 @@ export function ServicePage({ service, onNavigate }: ServicePageProps) {
         </div>
       </section>
 
-      {/* Dynamic Service-Specific FAQ Section & JSON-LD FAQSchema */}
-      <FAQSchema
-        renderVisibleUI={true}
+      {/* Service Tier Comparison Table: Standard Pump vs High-Pressure Cleaning vs Inspection */}
+      <ServiceComparisonTable
+        currentServiceId={service.id}
+        onSelectService={(selectedService) => {
+          trackEvent('quote_form_started', {
+            service: selectedService,
+            source: 'service_page_comparison',
+          });
+        }}
+      />
+
+      {/* Field Maintenance Demonstration Video Loop */}
+      <ServiceDemoVideo
+        title={`Certified ${service.name} Process in Action`}
+        subtitle={`Watch how our licensed partner crews execute high-volume vacuum pumping and ${service.name.toLowerCase()} standards.`}
+        onNavigate={onNavigate}
+      />
+
+      {/* Verified Local Houston Client Reviews with Star Ratings for this Service */}
+      <CustomerTestimonials
+        serviceId={service.id}
+        serviceName={service.name}
+        onNavigate={onNavigate}
+      />
+
+      {/* Interactive Homeowner Maintenance Checklist & Printable PDF Guide */}
+      <MaintenanceChecklist
+        defaultSystemType={service.id === 'aerobic' ? 'aerobic' : 'all'}
+      />
+
+      {/* Dynamic Service-Specific FAQ Accordion & JSON-LD FAQPage Schema */}
+      <FAQAccordion
         items={serviceFAQs}
         title={`Frequently Asked Questions About ${service.name}`}
         subtitle={`Expert answers regarding ${service.name.toLowerCase()} costs, service intervals, and Texas TCEQ guidelines across Greater Houston.`}
-        badgeText={`${service.name} Help Guide`}
+        badgeText={`${service.name} FAQ & Maintenance Guide`}
         sectionId={`faq-${service.id}`}
       />
     </>

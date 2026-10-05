@@ -5,6 +5,8 @@ import { SEOHead } from '../components/SEOHead';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
 import { CostEstimatorModal } from '../components/CostEstimatorModal';
+import { SepticCostCalculator } from '../components/SepticCostCalculator';
+import { ServiceProgress } from '../components/ServiceProgress';
 
 interface RequestQuotePageProps {
   onNavigate: (path: string) => void;
@@ -12,6 +14,12 @@ interface RequestQuotePageProps {
 
 export function RequestQuotePage({ onNavigate }: RequestQuotePageProps) {
   const [estimatorOpen, setEstimatorOpen] = useState(false);
+  const [appliedEstimate, setAppliedEstimate] = useState<{
+    tankSize: string;
+    lastService: string;
+    estimatedCost: string;
+    urgencyLevel: string;
+  } | null>(null);
   const breadcrumbs = [{ name: 'Request a Quote', url: '/request-a-quote/' }];
 
   return (
@@ -42,15 +50,23 @@ export function RequestQuotePage({ onNavigate }: RequestQuotePageProps) {
             Request a Free Septic Service Quote
           </h1>
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Connect with a verified, licensed septic professional in your Houston neighborhood. Honest pricing based on tank size and access.
+            Estimate your ballpark pricing below or connect directly with a verified, licensed septic professional in your Houston neighborhood.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="py-14 sm:py-20 bg-slate-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <section className="py-12 sm:py-16 bg-slate-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* Step 1: Interactive Septic Cost Ballpark Calculator */}
+          <SepticCostCalculator
+            onApplyEstimate={(estimate) => {
+              setAppliedEstimate(estimate);
+            }}
+          />
+
+          {/* Step 2: Form & Pricing Guides */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pt-4" id="quote-section">
             {/* Left Sidebar: Pricing Guides & Estimator trigger */}
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-4 shadow-xs">
@@ -59,10 +75,10 @@ export function RequestQuotePage({ onNavigate }: RequestQuotePageProps) {
                   <button
                     type="button"
                     onClick={() => setEstimatorOpen(true)}
-                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
+                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
                   >
                     <Calculator className="w-3.5 h-3.5" />
-                    <span>Estimator</span>
+                    <span>Quick Modal</span>
                   </button>
                 </div>
 
@@ -105,11 +121,34 @@ export function RequestQuotePage({ onNavigate }: RequestQuotePageProps) {
 
             {/* Right: Lead Form */}
             <div className="lg:col-span-8">
+              {appliedEstimate && (
+                <div className="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      Applied Estimate: <strong>{appliedEstimate.tankSize}</strong> ({appliedEstimate.lastService}) · Ballpark Range: <strong className="text-emerald-700">{appliedEstimate.estimatedCost}</strong>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAppliedEstimate(null)}
+                    className="text-emerald-700 hover:text-emerald-900 font-semibold underline text-[11px] cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
               <QuoteForm
                 title="Service Request Form"
-                subtitle="Fill out your property details below to receive availability and custom pricing."
+                subtitle="Fill out your property details below to receive fast availability and confirmed contractor pricing."
               />
             </div>
+          </div>
+
+          {/* Project Stages Transparency & Order Status Lookup */}
+          <div className="pt-8 border-t border-slate-200">
+            <ServiceProgress showLookupCard={true} />
           </div>
         </div>
       </section>

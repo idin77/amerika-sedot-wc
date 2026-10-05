@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MapPin, ArrowRight, Search, ShieldCheck } from 'lucide-react';
 import { SERVICE_AREAS, BUSINESS_CONFIG } from '../config/business';
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
+import { FAQSchema } from '../components/FAQSchema';
+import { ServiceAreaMap } from '../components/ServiceAreaMap';
+import { getRegionalCoverageFAQs } from '../lib/faqData';
 
 interface ServiceAreasPageProps {
   onNavigate: (path: string) => void;
@@ -13,6 +16,7 @@ interface ServiceAreasPageProps {
 export function ServiceAreasPage({ onNavigate }: ServiceAreasPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCounty, setSelectedCounty] = useState('all');
+  const coverageFAQs = useMemo(() => getRegionalCoverageFAQs(), []);
 
   const filteredAreas = SERVICE_AREAS.filter((area) => {
     const matchesSearch =
@@ -67,6 +71,19 @@ export function ServiceAreasPage({ onNavigate }: ServiceAreasPageProps) {
       {/* Main Filter & City Grid */}
       <section className="py-12 sm:py-16 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Interactive Greater Houston Service Area Vector Map & Local SEO Dispatch Visualizer */}
+          <div className="mb-12">
+            <ServiceAreaMap
+              onSelectArea={(areaId) => {
+                const matched = SERVICE_AREAS.find((a) => a.id === areaId);
+                if (matched) {
+                  setSearchQuery(matched.name);
+                }
+              }}
+              onNavigate={onNavigate}
+            />
+          </div>
+
           {/* Search & Filter Bar */}
           <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 mb-8 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:w-80">
@@ -182,6 +199,16 @@ export function ServiceAreasPage({ onNavigate }: ServiceAreasPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Regional Greater Houston Service Areas FAQ Section & JSON-LD FAQSchema */}
+      <FAQSchema
+        renderVisibleUI={true}
+        items={coverageFAQs}
+        title="Frequently Asked Questions About Houston Service Coverage"
+        subtitle="Coverage details, truck hose reach for acreage homes, unincorporated county service, and emergency dispatch windows."
+        badgeText="Greater Houston Regional FAQ"
+        sectionId="regional-coverage-faq"
+      />
     </>
   );
 }

@@ -1,21 +1,159 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { SERVICES, SERVICE_AREAS, BUSINESS_CONFIG } from '../config/business';
 
 export interface BreadcrumbItem {
   name: string;
   url: string;
 }
 
-interface BreadcrumbSchemaProps {
-  items: BreadcrumbItem[];
+export interface BreadcrumbSchemaProps {
+  items?: BreadcrumbItem[];
+  path?: string;
 }
 
 /**
- * Reusable SEO component that injects Schema.org BreadcrumbList JSON-LD structured data
- * into the document head to improve search engine result navigation trails.
+ * Helper to dynamically generate a breadcrumb list from any given URL pathname
  */
-export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
+export function deriveBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
+  const cleanPath = pathname.replace(/\/+$/, '') || '/';
+
+  // 1. Home root
+  if (cleanPath === '/' || cleanPath === '') {
+    return [{ name: 'Home', url: '/' }];
+  }
+
+  // 2. Exact match static pages
+  if (cleanPath === '/service-areas') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Service Areas', url: '/service-areas/' },
+    ];
+  }
+
+  if (cleanPath === '/about-us') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'About Us', url: '/about-us/' },
+    ];
+  }
+
+  if (cleanPath === '/contact') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Contact Us', url: '/contact/' },
+    ];
+  }
+
+  if (cleanPath === '/request-a-quote') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Request a Quote', url: '/request-a-quote/' },
+    ];
+  }
+
+  if (cleanPath === '/privacy-policy') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Privacy Policy', url: '/privacy-policy/' },
+    ];
+  }
+
+  if (cleanPath === '/terms-of-service') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Terms of Service', url: '/terms-of-service/' },
+    ];
+  }
+
+  if (cleanPath === '/sitemap') {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'HTML Sitemap', url: '/sitemap/' },
+    ];
+  }
+
+  // 3. Match Service Pages (e.g., /septic-tank-pumping-houston-tx/)
+  const serviceSlug = cleanPath.replace(/^\//, '');
+  const matchedService = SERVICES.find((s) => s.slug === serviceSlug);
+  if (matchedService) {
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Services', url: '/' },
+      { name: matchedService.name, url: `/${matchedService.slug}/` },
+    ];
+  }
+
+  // 4. Match City Pages (e.g., /service-areas/katy-tx/)
+  const cityMatch = cleanPath.match(/^\/service-areas\/([^/]+)$/);
+  if (cityMatch) {
+    const citySlug = cityMatch[1];
+    const matchedCity = SERVICE_AREAS.find(
+      (c) => c.slug === citySlug || c.id === citySlug.replace('-tx', '')
+    );
+
+    if (matchedCity) {
+      return [
+        { name: 'Home', url: '/' },
+        { name: 'Service Areas', url: '/service-areas/' },
+        { name: `${matchedCity.name}, TX`, url: `/service-areas/${matchedCity.slug}/` },
+      ];
+    }
+  }
+
+  // 5. Fallback for any hierarchical sub-path
+  const segments = cleanPath.split('/').filter(Boolean);
+  const breadcrumbs: BreadcrumbItem[] = [{ name: 'Home', url: '/' }];
+  let accumulatedPath = '';
+
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    accumulatedPath += `/${seg}`;
+
+    // Format human-readable title from kebab-case segment
+    const formattedName = seg
+      .replace(/-tx$/, ', TX')
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    breadcrumbs.push({
+      name: formattedName,
+      url: `${accumulatedPath}/`,
+    });
+  }
+
+  return breadcrumbs;
+}
+
+/**
+ * BreadcrumbSchema Component:
+ * Injects Schema.org JSON-LD BreadcrumbList structured data into <head>
+ * dynamically for any route or explicit breadcrumb items array.
+ * Ensures Google, Bing, and other search engines crawl site hierarchy
+ * and render breadcrumb navigation trails in search result snippets.
+ */
+export function BreadcrumbSchema({ items, path }: BreadcrumbSchemaProps) {
+  // Determine breadcrumbs list: use explicit items or dynamically derive from path/location
+  const resolvedItems = useMemo(() => {
+    if (items && items.length > 0) {
+      // Ensure 'Home' is root position 1 if not already provided
+      const hasHome = items.some(
+        (it) => it.url === '/' || it.name.trim().toLowerCase() === 'home'
+      );
+      return hasHome ? items : [{ name: 'Home', url: '/' }, ...items];
+    }
+
+    const currentPath =
+      path ||
+      (typeof window !== 'undefined' ? window.location.pathname : '/');
+
+    return deriveBreadcrumbsFromPath(currentPath);
+  }, [items, path]);
+
+  // Inject or update JSON-LD Schema in <head>
   useEffect(() => {
-    if (typeof document === 'undefined' || !items || items.length === 0) return;
+    if (typeof document === 'undefined' || !resolvedItems || resolvedItems.length === 0) {
+      return;
+    }
 
     const SCRIPT_ID = 'jsonld-breadcrumb-schema';
     let scriptTag = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
@@ -32,18 +170,10 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
         ? window.location.origin
         : 'https://www.septicprodirect.com';
 
-    // Normalize list: prepend 'Home' as position 1 if not already present
-    const hasHome = items.some(
-      (item) => item.url === '/' || item.name.trim().toLowerCase() === 'home'
-    );
-    const fullList: BreadcrumbItem[] = hasHome
-      ? items
-      : [{ name: 'Home', url: '/' }, ...items];
-
     const schemaData = {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      itemListElement: fullList.map((item, index) => {
+      itemListElement: resolvedItems.map((item, index) => {
         let fullUrl = item.url;
         if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
           const cleanPath = fullUrl.startsWith('/') ? fullUrl : `/${fullUrl}`;
@@ -67,7 +197,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
         tagToRemove.parentNode.removeChild(tagToRemove);
       }
     };
-  }, [items]);
+  }, [resolvedItems]);
 
   return null;
 }

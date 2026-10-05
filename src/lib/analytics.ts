@@ -4,7 +4,12 @@ export type AnalyticsEvent =
   | 'quote_form_started'
   | 'estimator_calculated'
   | 'service_viewed'
-  | 'city_viewed';
+  | 'city_viewed'
+  | 'map_area_click'
+  | 'checklist_downloaded'
+  | 'checklist_item_toggled'
+  | 'checklist_reset'
+  | 'blog_post_viewed';
 
 interface EventProperties {
   location?: string;

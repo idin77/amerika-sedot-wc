@@ -19,9 +19,12 @@ import { BUSINESS_CONFIG, SERVICES, SERVICE_AREAS, FREQUENTLY_ASKED_QUESTIONS } 
 import { IMAGES } from '../lib/images';
 import { SEOHead } from '../components/SEOHead';
 import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
-import { FAQSchema } from '../components/FAQSchema';
+import { FAQAccordion } from '../components/FAQAccordion';
+import { SepticMaintenanceBlog } from '../components/SepticMaintenanceBlog';
 import { ReviewSchema } from '../components/ReviewSchema';
+import { CustomerTestimonials } from '../components/CustomerTestimonials';
 import { TestimonialSlider } from '../components/TestimonialSlider';
+import { ServiceDemoVideo } from '../components/ServiceDemoVideo';
 import { QuoteForm } from '../components/QuoteForm';
 import { CostEstimatorModal } from '../components/CostEstimatorModal';
 import { trackEvent } from '../lib/analytics';
@@ -339,6 +342,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
+      {/* Field Walkthrough & Process Demonstration Video Loop */}
+      <ServiceDemoVideo onNavigate={onNavigate} />
+
       {/* 5. Authentic Pricing Breakdown & Interactive Estimator Helper */}
       <section className="py-16 sm:py-20 bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -515,18 +521,24 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      {/* 8. Customer Testimonials & Review Schema */}
-      <ReviewSchema renderVisibleUI={true} />
+      {/* 8. Customer Testimonials & Verified Houston Homeowner Reviews with Star Ratings */}
+      <CustomerTestimonials onNavigate={onNavigate} />
 
-      {/* 9. FAQ Section: Displays common septic questions & injects JSON-LD FAQSchema for local SEO */}
-      <FAQSchema
-        renderVisibleUI={true}
-        items={FREQUENTLY_ASKED_QUESTIONS}
-        title="Frequently Asked Questions About Septic Pumping in Houston"
-        subtitle="Transparent answers regarding tank pumping intervals, costs across Harris County, emergency overflow signs, and contractor matching."
+      {/* Review Schema: Injects JSON-LD structured data for Google SERP star ratings */}
+      <ReviewSchema renderVisibleUI={false} />
+
+      {/* 9. Interactive FAQ Accordion: Dynamically renders septic maintenance FAQs & injects JSON-LD FAQPage Schema */}
+      <FAQAccordion
+        title="Frequently Asked Questions About Septic Maintenance in Houston"
+        subtitle="Transparent answers regarding tank pumping intervals, warning signs of full tanks, aerobic ATU care, and costs across Greater Houston."
+        badgeText="Houston Septic Maintenance Guide"
+        sectionId="home-faq-accordion"
       />
 
-      {/* 10. Dedicated Lead Form Section */}
+      {/* 10. Educational Knowledge Base & Texas TCEQ Septic Regulations Blog for Long-Tail SEO */}
+      <SepticMaintenanceBlog onNavigate={onNavigate} />
+
+      {/* 11. Dedicated Lead Form Section */}
       <section className="py-16 sm:py-20 bg-white border-t border-slate-200" id="quote-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">

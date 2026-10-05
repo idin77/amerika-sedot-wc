@@ -45,7 +45,7 @@ export interface CityArea {
 export interface FAQItem {
   question: string;
   answer: string;
-  category?: 'general' | 'pricing' | 'maintenance' | 'emergency';
+  category?: string;
 }
 
 export interface LeadFormData {

@@ -83,3 +83,37 @@ export function getCityFAQs(city: CityArea): FAQItem[] {
     },
   ];
 }
+
+/**
+ * FAQ items for the overarching Greater Houston Service Areas directory
+ */
+export function getRegionalCoverageFAQs(): FAQItem[] {
+  return [
+    {
+      question: 'Which Texas counties in Greater Houston are covered by partner septic haulers?',
+      answer: 'Our contractor network covers Harris County, Fort Bend County, Montgomery County, Brazoria County, and Galveston County, including major residential communities in Houston, Katy, Sugar Land, The Woodlands, Pearland, Cypress, Spring, Conroe, Tomball, Richmond, Friendswood, and League City.',
+      category: 'Coverage Areas',
+    },
+    {
+      question: 'Can vacuum pump trucks reach rural or acreage properties with long setbacks?',
+      answer: 'Yes. Partner pump trucks carry between 100 and 150 feet of commercial heavy-duty suction hose to reach septic tanks positioned behind homes, past gardens, or on acreage parcels without having heavy tanker axles drive directly onto your lawn or soft turf.',
+      category: 'Access & Logistics',
+    },
+    {
+      question: 'How do response times vary across different Houston suburbs?',
+      answer: 'Because partner haulers are stationed across Northwest Harris, Fort Bend, and Montgomery counties, dispatch times typically range between 90 minutes and 3 hours for emergency backups, and within 24 to 48 hours for scheduled preventative pump-outs.',
+      category: 'Dispatch Times',
+    },
+    {
+      question: 'Do local partners service both aerobic treatment systems and conventional tanks?',
+      answer: 'Yes. All registered partners handle multi-compartment conventional gravity tanks as well as aerobic treatment units (ATUs), including trash tank pumping, aerator evaluation, and effluent filter cleaning in compliance with Texas TCEQ Chapter 285 standards.',
+      category: 'System Types',
+    },
+    {
+      question: 'What if my property is located in an unincorporated county pocket?',
+      answer: 'A significant portion of residential septic systems in Greater Houston reside in unincorporated county areas. Partner haulers routinely service unincorporated addresses in Harris, Montgomery, and Fort Bend counties without extra jurisdiction surcharges.',
+      category: 'Unincorporated Areas',
+    },
+  ];
+}
+

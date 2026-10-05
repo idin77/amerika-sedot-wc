@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Phone, Menu, X, ArrowUpRight, MessageCircle } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/business';
 import { trackEvent } from '../lib/analytics';
+import { EmergencyIndicator } from './EmergencyIndicator';
 
 interface HeaderProps {
   currentPath: string;
@@ -38,14 +39,17 @@ export function Header({ currentPath, onNavigate, onOpenQuoteModal }: HeaderProp
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
       {/* 3-Zone Top Bar Contract */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-        {/* Zone 1: Single text element wordmark */}
-        <a
-          href="/"
-          onClick={(e) => handleLinkClick(e, '/')}
-          className="text-xl font-bold tracking-tight text-slate-900 hover:text-slate-700 transition-colors shrink-0"
-        >
-          {BUSINESS_CONFIG.brandName}
-        </a>
+        {/* Zone 1: Single text element wordmark + Urgent Emergency Indicator */}
+        <div className="flex items-center gap-3 shrink-0">
+          <a
+            href="/"
+            onClick={(e) => handleLinkClick(e, '/')}
+            className="text-xl font-bold tracking-tight text-slate-900 hover:text-slate-700 transition-colors shrink-0"
+          >
+            {BUSINESS_CONFIG.brandName}
+          </a>
+          <EmergencyIndicator variant="pill" className="hidden sm:inline-flex" />
+        </div>
 
         {/* Zone 2: 4–6 nav links, 1–2 word labels, single-line text with subtle underlines */}
         <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600">
@@ -114,6 +118,9 @@ export function Header({ currentPath, onNavigate, onOpenQuoteModal }: HeaderProp
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 shadow-xl animate-in slide-in-from-top duration-200">
+          <div className="mb-3 pt-1">
+            <EmergencyIndicator variant="pill" className="w-full justify-center py-2 text-xs" showPhone={true} />
+          </div>
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = currentPath === link.path;

@@ -16,6 +16,8 @@ import { SitemapPage } from './pages/SitemapPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { QuoteForm } from './components/QuoteForm';
 import { MetaTags } from './components/MetaTags';
+import { BreadcrumbSchema } from './components/BreadcrumbSchema';
+import { LeadConversionTracker } from './components/LeadConversionTracker';
 import { X } from 'lucide-react';
 
 export default function App() {
@@ -116,6 +118,12 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans antialiased selection:bg-emerald-600 selection:text-white">
       {/* Route-Aware Dynamic Meta Tags (Title, Description, Canonical & Social) */}
       <MetaTags currentPath={currentPath} />
+
+      {/* Dynamic Route-Aware Breadcrumb Structured Data (Schema.org BreadcrumbList) */}
+      <BreadcrumbSchema path={currentPath} />
+
+      {/* Lead Conversion Tracking & Webhook Forwarder (GA4 & Webhook Relay) */}
+      <LeadConversionTracker />
 
       {/* Top Bar Navigation */}
       <Header
