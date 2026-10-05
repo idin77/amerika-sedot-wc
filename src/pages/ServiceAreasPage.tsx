@@ -7,6 +7,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { QuoteForm } from '../components/QuoteForm';
 import { FAQSchema } from '../components/FAQSchema';
 import { ServiceAreaMap } from '../components/ServiceAreaMap';
+import { ServiceMap } from '../components/ServiceMap';
 import { getRegionalCoverageFAQs } from '../lib/faqData';
 
 interface ServiceAreasPageProps {
@@ -189,6 +190,11 @@ export function ServiceAreasPage({ onNavigate }: ServiceAreasPageProps) {
               </button>
             </div>
           )}
+
+          {/* Live GPS Markers: Recently Completed Septic Projects Across Greater Houston */}
+          <div className="mb-16">
+            <ServiceMap onNavigate={onNavigate} />
+          </div>
 
           {/* Quick Quote Section */}
           <div className="max-w-3xl mx-auto">

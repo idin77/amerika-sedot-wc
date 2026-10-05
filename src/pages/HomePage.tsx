@@ -22,6 +22,11 @@ import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
 import { EmergencyRepairAlert } from '../components/EmergencyRepairAlert';
 import { SepticFAQ } from '../components/SepticFAQ';
 import { SepticMaintenanceBlog } from '../components/SepticMaintenanceBlog';
+import { SepticPreInspectionChecklist } from '../components/SepticPreInspectionChecklist';
+import { SepticMaintenanceScheduler } from '../components/SepticMaintenanceScheduler';
+import { SepticMaintenanceHistory } from '../components/SepticMaintenanceHistory';
+import { RegionalWeatherMonitor } from '../components/RegionalWeatherMonitor';
+import { ReferralRewards } from '../components/ReferralRewards';
 import { ReviewSchema } from '../components/ReviewSchema';
 import { CustomerTestimonials } from '../components/CustomerTestimonials';
 import { TestimonialSlider } from '../components/TestimonialSlider';
@@ -536,6 +541,21 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
       {/* 10. Educational Knowledge Base & Texas TCEQ Septic Regulations Blog for Long-Tail SEO */}
       <SepticMaintenanceBlog onNavigate={onNavigate} />
+
+      {/* 10b. Homeowner Diagnostic Pre-Inspection Self-Assessment & Remote Triage */}
+      <SepticPreInspectionChecklist onNavigate={onNavigate} />
+
+      {/* 10c. Septic Maintenance Cycle Scheduler & Email Notifications */}
+      <SepticMaintenanceScheduler onNavigate={onNavigate} />
+
+      {/* 10c-2. Customer Septic Maintenance History Passport & Upcoming Calendar */}
+      <SepticMaintenanceHistory onNavigate={onNavigate} />
+
+      {/* 10d. Regional Weather & Septic Soil Saturation Monitor */}
+      <RegionalWeatherMonitor onNavigate={onNavigate} />
+
+      {/* 10e. Customer Referral Rewards Program (Give $35, Get $50) */}
+      <ReferralRewards onNavigate={onNavigate} />
 
       {/* 11. Dedicated Lead Form Section */}
       <section className="py-16 sm:py-20 bg-white border-t border-slate-200" id="quote-section">

@@ -9,6 +9,7 @@ import { CustomerTestimonials } from '../components/CustomerTestimonials';
 import { ServiceComparisonTable } from '../components/ServiceComparisonTable';
 import { ServiceDemoVideo } from '../components/ServiceDemoVideo';
 import { MaintenanceChecklist } from '../components/MaintenanceChecklist';
+import { HoustonSepticPermitLookup } from '../components/HoustonSepticPermitLookup';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { getServiceFAQs } from '../lib/faqData';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -283,6 +284,12 @@ export function ServicePage({ service, onNavigate }: ServicePageProps) {
       {/* Interactive Homeowner Maintenance Checklist & Printable PDF Guide */}
       <MaintenanceChecklist
         defaultSystemType={service.id === 'aerobic' ? 'aerobic' : 'all'}
+      />
+
+      {/* Houston Septic Permit Lookup, County OSSF Portals, and Assisted As-Built Retrieval */}
+      <HoustonSepticPermitLookup
+        serviceName={service.name}
+        onNavigate={onNavigate}
       />
 
       {/* Dynamic Service-Specific FAQ Accordion & JSON-LD FAQPage Schema */}

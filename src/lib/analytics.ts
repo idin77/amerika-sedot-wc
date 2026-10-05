@@ -11,7 +11,19 @@ export type AnalyticsEvent =
   | 'checklist_reset'
   | 'blog_post_viewed'
   | 'emergency_alert_viewed'
-  | 'emergency_alert_action_clicked';
+  | 'emergency_alert_action_clicked'
+  | 'scheduler_calculated'
+  | 'scheduler_reminder_subscribed'
+  | 'triage_assessment_started'
+  | 'triage_assessment_submitted'
+  | 'permit_lookup_queried'
+  | 'permit_lookup_submitted'
+  | 'referral_code_generated'
+  | 'referral_link_copied'
+  | 'referral_balance_checked'
+  | 'maintenance_record_added'
+  | 'maintenance_calendar_viewed'
+  | 'maintenance_log_exported';
 
 interface EventProperties {
   location?: string;
